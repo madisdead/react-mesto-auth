@@ -1,0 +1,17 @@
+@import url('./__heading/element__heading.css');
+@import url('./__image/element__image.css');
+@import url('./__like/element__like.css');
+@import url('./__caption/element__caption.css');
+@import url('./__remove/element__remove.css');
+@import url('./__likes/element__likes.css');
+@import url('./__like-counter/element__like-counter.css');
+@import url('./__remove/_hidden/element__remove_hidden.css');
+
+.element {
+  width: 282px;
+  height: 361px;
+  background: #FFFFFF;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}

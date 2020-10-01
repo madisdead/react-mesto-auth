@@ -1,0 +1,7 @@
+.profile__edit-pen {
+  height: 26px;
+  width: 26px;
+  background-image: url('../../../images/edit-avatar.png');
+  background-size: cover;
+  align-self: center;
+}

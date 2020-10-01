@@ -1,0 +1,17 @@
+.profile__edit-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  background-color: black;
+  cursor: pointer;
+}
+
+.profile__edit-overlay:hover {
+  opacity: .8;
+  transition: opacity 1s ease-in-out;
+}
