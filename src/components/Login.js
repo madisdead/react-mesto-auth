@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import * as auth from '../auth.js';
 
 class Login extends React.Component {
   constructor(props){
@@ -11,10 +10,6 @@ class Login extends React.Component {
     }  
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleTokenCheck = this.handleTokenCheck.bind(this);
-  }
-  componentDidMount(){
-    this.handleTokenCheck();
   }
   handleChange(e) {
     const {name, value} = e.target;
@@ -22,35 +17,19 @@ class Login extends React.Component {
       [name]: value 
     });
   }
+
   handleSubmit(e){
     e.preventDefault();
     if (!this.state.email || !this.state.password){
       return;
     }
-    auth.authorize(this.state.email, this.state.password)
-      .then((data)=>{
-        if (data.token){
-          this.setState({email: '', password: ''} ,() => {
-            this.props.handleLogin();
-            this.handleTokenCheck();
-            this.props.history.push('/');
-          });
-        }  
+    this.props.onLogin(this.state.email, this.state.password)
+      .then(() => {
+        this.setState({email: '', password: ''} ,() => { 
+          this.props.history.push('/'); 
+        }); 
       })
       .catch(err => console.log(err));
-  }
-  handleTokenCheck() {
-    if (localStorage.getItem('jwt')){
-      const jwt = localStorage.getItem('jwt');
-      auth.checkToken(jwt)
-        .then((res) => {
-          if (res){
-            this.props.setNewEmail(res.data.email);
-            this.props.handleLogin();
-            this.props.history.push('/');
-          }
-        });
-    }
   }
 
   render(){

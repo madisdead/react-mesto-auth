@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { useHistory, Route, Switch, Redirect } from 'react-router-dom';
 import '../index.css';
 import Header from './Header.js';
 import Main from './Main.js';
@@ -15,6 +15,7 @@ import ProtectedRoute from './ProtectedRoute';
 import Login from './Login';
 import Register from './Register';
 import InfoTooltip from './InfoToolTip.js';
+import * as auth from '../utils/auth.js';
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -27,6 +28,7 @@ function App() {
   const [isInfoTooltippOpen, setIsInfoTooltipOpen] = useState(false);
   const [isRegisterSuccess, setRegisterSuccess] = useState(false);
   const [email, setEmail] = useState('');
+  const history = useHistory();
 
   React.useEffect(()=>{
     newApi.getInitialCards()
@@ -44,6 +46,9 @@ function App() {
         console.log(err);
       });
   }, []);
+  React.useEffect(()=>{
+    handleTokenCheck();
+  })
 
   function handleCardLike(card) {
     const isLiked = card.likes.some(i => i._id === currentUser._id);
@@ -134,12 +139,43 @@ function App() {
     setRegisterSuccess(bool);
   }
 
-  function handleRegister() {
-    setIsInfoTooltipOpen(true);
+  function handleRegister(password, email) {
+    return auth.register(password, email).then((res) => {
+      if(res.ok){
+        history.push('/login');
+        failSuccessRegister(true);
+        setIsInfoTooltipOpen(true);
+      } else {
+        console.log('Произошла ошибка.');
+        this.props.failSuccessRegister(false);
+        setIsInfoTooltipOpen(true);
+      }
+    });
   }
 
-  function handleLogin() {
-    setLoggedIn(true);
+  function handleTokenCheck() {
+    if (localStorage.getItem('jwt')){
+      const jwt = localStorage.getItem('jwt');
+      auth.checkToken(jwt)
+        .then((res) => {
+          if (res){
+            setNewEmail(res.data.email);
+            setLoggedIn(true);
+            history.push('/');
+          }
+        })
+        .catch(err => console.log(err));
+    }
+  }
+
+  function handleLogin(email, password) {
+    
+    return auth.authorize(email, password)
+      .then((data)=>{
+        if (data.token){
+          setLoggedIn(true);
+        }
+      });
   }
 
   function exitProfile() {
@@ -150,43 +186,48 @@ function App() {
     setEmail(email);
   }
 
+  function signOut(){
+    localStorage.removeItem('jwt');
+    exitProfile();
+    setNewEmail('');
+    history.push('/sign-in');
+  }
+
   return (
-    <BrowserRouter>
-      <CurrentUserContext.Provider value={currentUser}>
-      <div className="page">
-        <Header exitProfile={exitProfile} email={email} setNewEmail={setNewEmail} />
-        <Switch>
-          <Route path="/sign-up">
-            <Register onRegister={handleRegister} onSuccess={handleLogin} failSuccessRegister={failSuccessRegister} />
-          </Route>
-          <Route path="/sign-in">
-            <Login handleLogin={handleLogin} loggedIn={loggedIn} setNewEmail={setNewEmail} />
-          </Route>
-          <ProtectedRoute path="/" loggedIn={loggedIn} component={Main}
-            onCardDelete={handleCardDelete}
-            onCardLike={handleCardLike}
-            cards={cards}
-            onEditProfile={handleEditProfileClick} 
-            onAddPlaceClick={handleAddPlaceClick} 
-            onEditAvatar={handleEditAvatarClick} 
-            onCardClick={handleCardClick}>
-          </ProtectedRoute>
-          <Route exact path="/*">
-            {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
-          </Route>
-        </Switch>
-        {loggedIn && <Footer />}
-        <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser}/>
-        <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} />
-        <ImagePopup card={selectedCard} onClose={closeAllPopups} />
-        <PopupWithForm name="confirm" title="Вы уверены?">
-          <button className="popup__button popup__button_confirm">Да</button>
-        </PopupWithForm>
-        <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} />
-        <InfoTooltip isOpen={isInfoTooltippOpen} onClose={closeAllPopups} registerSuccess={isRegisterSuccess} />
-        </div>
-      </CurrentUserContext.Provider>
-    </BrowserRouter>
+    <CurrentUserContext.Provider value={currentUser}>
+    <div className="page">
+      <Header email={email} onSignOut={signOut} />
+      <Switch>
+        <Route path="/sign-up">
+          <Register onRegister={handleRegister} />
+        </Route>
+        <Route path="/sign-in">
+          <Login onLogin={handleLogin} loggedIn={loggedIn} />
+        </Route>
+        <ProtectedRoute path="/" loggedIn={loggedIn} component={Main}
+          onCardDelete={handleCardDelete}
+          onCardLike={handleCardLike}
+          cards={cards}
+          onEditProfile={handleEditProfileClick} 
+          onAddPlaceClick={handleAddPlaceClick} 
+          onEditAvatar={handleEditAvatarClick} 
+          onCardClick={handleCardClick}>
+        </ProtectedRoute>
+        <Route exact path="/*">
+          {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
+        </Route>
+      </Switch>
+      {loggedIn && <Footer />}
+      <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser}/>
+      <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlaceSubmit} />
+      <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+      <PopupWithForm name="confirm" title="Вы уверены?">
+        <button className="popup__button popup__button_confirm">Да</button>
+      </PopupWithForm>
+      <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} />
+      <InfoTooltip isOpen={isInfoTooltippOpen} onClose={closeAllPopups} registerSuccess={isRegisterSuccess} />
+    </div>
+    </CurrentUserContext.Provider>
   );
 }
 

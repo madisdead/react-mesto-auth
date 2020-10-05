@@ -1,14 +1,7 @@
 import React from 'react';
-import { useHistory, Route, Switch, Link } from 'react-router-dom';
+import { Route, Switch, Link } from 'react-router-dom';
 
-function Header(props) {
-  const history = useHistory();
-  function signOut(){
-    localStorage.removeItem('jwt');
-    props.exitProfile();
-    props.setNewEmail('');
-    history.push('/sign-in');
-  }
+function Header(props) {  
   return (
     <header className="header">
       <div className="header__content">
@@ -23,7 +16,7 @@ function Header(props) {
             </Route>
             <Route path="/">
               <p className="header__email">{props.email}</p>
-              <p className="header__exit" onClick={signOut}>Выйти</p>
+              <p className="header__exit" onClick={props.onSignOut}>Выйти</p>
             </Route>
           </Switch>
         </div>
