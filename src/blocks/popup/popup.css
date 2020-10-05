@@ -14,6 +14,9 @@
 @import url('./__input/_type/popup__input_type_error.css');
 @import url('./__error/_active/popup__error_active.css');
 @import url('./__button/_confirm/popup__button_confirm.css');
+@import url('./__success-image/popup__success-image.css');
+@import url('./__success-text/popup__success-text.css');
+@import url('./__fail-image/popup__fail-image.css');
 
 .popup {
   position: fixed;

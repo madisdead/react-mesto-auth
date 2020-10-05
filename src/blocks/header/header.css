@@ -1,4 +1,9 @@
 @import url('./__logo/header__logo.css');
+@import url('./__content/header__content.css');
+@import url('./__container/header__container.css');
+@import url('./__email/header__email.css');
+@import url('./__exit/header__exit.css');
+@import url('./__link/header__link.css');
 
 .header {
   display: flex;
