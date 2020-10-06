@@ -147,7 +147,7 @@ function App() {
         setIsInfoTooltipOpen(true);
       } else {
         console.log('Произошла ошибка.');
-        this.props.failSuccessRegister(false);
+        failSuccessRegister(false);
         setIsInfoTooltipOpen(true);
       }
     });
